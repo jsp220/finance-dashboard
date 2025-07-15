@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  checking
+  savings
+  credit
+  investment
+}
+
+enum TransactionType {
+  income
+  expense
+  transfer
+  refund
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  passwordHash  String      @map("password_hash")
+  name          String
+  currency      String      @default("USD")
+  timezone      String      @default("America/Los_Angeles")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")  
+
+  accounts      Account[]
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Account {
+  id            String      @id @default(cuid())
+  userId        String      @map("user_id")
+  name          String
+  type          AccountType
+  balance       Decimal     @default(0.00) @db.Decimal(15, 2)
+  currency      String      @default("USD")
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  userId        String          @map("user_id")
+  accountId     String          @map("account_id")
+  amount        Decimal         @db.Decimal(15, 2)
+  type          TransactionType
+  category      String
+  description   String?
+  date          String          // Stored as YYYY-MM-DD string
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
