@@ -1,6 +1,4 @@
 import Image from "next/image";
-import UserList from "./components/UserList";
-import PrayerList from "./components/PrayerList";
 
 export default function Home() {
     return (
