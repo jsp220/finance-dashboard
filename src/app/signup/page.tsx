@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserResponse } from "../lib/types/user";
+import { UserResponse } from "@/src/app/lib/types/user";
 
 export default function SignUp() {
     const [formData, setFormData] = useState({
@@ -13,7 +13,6 @@ export default function SignUp() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState(false);
     const [createdUser, setCreatedUser] = useState<UserResponse | null>(null);
 
     const handleChange = (
@@ -30,7 +29,6 @@ export default function SignUp() {
         e.preventDefault();
         setLoading(true);
         setError("");
-        setSuccess(false);
 
         try {
             const response = await fetch("/api/users", {
@@ -47,7 +45,6 @@ export default function SignUp() {
                 throw new Error(data.error || "Failed to create account");
             }
 
-            setSuccess(true);
             setCreatedUser(data);
             setFormData({
                 email: "",
@@ -56,6 +53,8 @@ export default function SignUp() {
                 currency: "USD",
                 timezone: "America/Los_Angeles",
             });
+            localStorage.setItem("userId", createdUser?.id || "");
+            alert("Account created successfully!");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -66,11 +65,6 @@ export default function SignUp() {
             setLoading(false);
         }
     };
-
-    if (success) {
-        alert("Account created successfully!");
-        localStorage.setItem("userId", createdUser?.id || "");
-    }
 
     return (
         <div className="min-h-screen min-w-full flex flex-col space-y-6 items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
