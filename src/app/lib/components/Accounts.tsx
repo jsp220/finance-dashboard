@@ -6,7 +6,15 @@ import { capitalize, formatBalance } from "@/src/app/lib/utils";
 import { CreateAccountModal } from "@/src/app/lib/modals/CreateAccountModal";
 import { authenticatedFetch } from "@/lib/api-client";
 
-export const Accounts = () => {
+interface AccountsProps {
+    onAccountsChange: (accounts: Account[]) => void;
+    onRefreshFunctionChange: (refreshFn: () => void) => void;
+}
+
+export const Accounts = ({
+    onAccountsChange,
+    onRefreshFunctionChange,
+}: AccountsProps) => {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loadingAccounts, setLoadingAccounts] = useState(false);
     const [accountsError, setAccountsError] = useState("");
@@ -15,6 +23,8 @@ export const Accounts = () => {
     // Fetch accounts
     useEffect(() => {
         fetchAccounts();
+
+        onRefreshFunctionChange(fetchAccounts);
     }, []);
 
     const fetchAccounts = async () => {
@@ -30,7 +40,10 @@ export const Accounts = () => {
                 throw new Error(data.message || "Failed to fetch accounts");
             }
 
-            setAccounts(data.accounts || []);
+            const accounts = data.accounts || [];
+
+            setAccounts(accounts);
+            onAccountsChange(accounts);
         } catch (error) {
             if (error instanceof Error) {
                 setAccountsError(error.message);
@@ -62,8 +75,8 @@ export const Accounts = () => {
 
     return (
         <>
-            <section className="text-sm md:text-[16px] md:mt-3">
-                <h3 className="font-semibold md:mb-4">Your Accounts</h3>
+            <section className="text-sm md:text-[16px] mt-3">
+                <h3 className="font-semibold">Your Accounts</h3>
 
                 {loadingAccounts ? (
                     <div className="text-center py-4">Loading accounts...</div>
@@ -158,7 +171,7 @@ export const Accounts = () => {
                 )}
 
                 {/* Add Account Button */}
-                <div className="mt-6 flex justify-center">
+                <div className="flex justify-center">
                     <button
                         onClick={handleAddAccount}
                         className="px-4 py-2 border border-gray-700 dark:border-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors"

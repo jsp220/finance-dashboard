@@ -2,13 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BasicUser } from "@/src/app/lib/types/user";
+import { Account } from "@/src/app/lib/types/account";
 import { Accounts } from "@/src/app/lib/components/Accounts";
+import { Transactions } from "@/src/app/lib/components/Transactions";
 
 export default function Dashboard() {
     const router = useRouter();
     const [user, setUser] = useState<BasicUser | null>(null);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+
+    const refreshAccountsRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         // Get user info for display
@@ -24,6 +29,23 @@ export default function Dashboard() {
     const handleLogout = () => {
         auth.logout();
         router.push("/");
+    };
+
+    // Callback function to receive accounts from Accounts component
+    const handleAccountsUpdate = (updatedAccounts: Account[]) => {
+        setAccounts(updatedAccounts);
+    };
+
+    // Receives the refresh function from Accounts component
+    const handleRefreshFunctionUpdate = (refreshFn: () => void) => {
+        refreshAccountsRef.current = refreshFn;
+    };
+
+    // Triggers accounts to refresh
+    const triggerAccountsRefresh = () => {
+        if (refreshAccountsRef.current) {
+            refreshAccountsRef.current();
+        }
     };
 
     // Show loading or redirect if not authenticated
@@ -62,7 +84,17 @@ export default function Dashboard() {
                         Welcome, {user.name}!
                     </h2>
 
-                    <Accounts />
+                    <Accounts
+                        onAccountsChange={handleAccountsUpdate}
+                        onRefreshFunctionChange={handleRefreshFunctionUpdate}
+                    />
+
+                    <div className="m-2"></div>
+
+                    <Transactions
+                        accounts={accounts}
+                        onAccountBalanceChange={triggerAccountsRefresh}
+                    />
                 </main>
             </div>
         </div>
