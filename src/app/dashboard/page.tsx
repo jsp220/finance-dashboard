@@ -41,7 +41,7 @@ export default function Dashboard() {
                 {/* Header */}
                 <header className="w-full flex justify-stretch items-center min-h-12 border-b-1">
                     <div className="md:w-3/4">
-                        <h1 className="text-md md:text-xl font-semibold">
+                        <h1 className="text-lg md:text-xl font-semibold">
                             Personal Finance Dashboard
                         </h1>
                     </div>
@@ -58,7 +58,7 @@ export default function Dashboard() {
 
                 {/* Main Content */}
                 <main className="w-full flex flex-col ">
-                    <h2 className="py-4 text-lg font-semibold">
+                    <h2 className="py-4 md:text-lg font-semibold">
                         Welcome, {user.name}!
                     </h2>
 

@@ -99,7 +99,7 @@ export const CreateAccountModal = ({
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="text-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        className="w-5 rounded-sm text-lg text-gray-500 hover:bg-gray-300 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                     >
                         &times;
                     </button>
@@ -202,7 +202,7 @@ export const CreateAccountModal = ({
                             type="submit"
                             onClick={handleSubmit}
                             disabled={loading || !formData.name.trim()}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? "Creating..." : "Create Account"}
                         </button>

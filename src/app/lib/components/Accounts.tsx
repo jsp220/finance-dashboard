@@ -52,6 +52,11 @@ export const Accounts = ({ user }: AccountsProps) => {
         }
     };
 
+    const handleStatusToggle = async (accountId: string, isActive: boolean) => {
+        //TODO: Implement status toggle logic
+        console.log(`Toggling status for account ${accountId} to ${!isActive}`);
+    };
+
     const handleAddAccount = () => {
         setShowCreateModal(true);
     };
@@ -67,8 +72,8 @@ export const Accounts = ({ user }: AccountsProps) => {
 
     return (
         <>
-            <section className="mt-6">
-                <h3 className="text-md font-semibold mb-4">Your Accounts</h3>
+            <section className="text-sm md:text-[16px] md:mt-3">
+                <h3 className="font-semibold md:mb-4">Your Accounts</h3>
 
                 {loadingAccounts ? (
                     <div className="text-center py-8">Loading accounts...</div>
@@ -120,14 +125,28 @@ export const Accounts = ({ user }: AccountsProps) => {
                                         <td className="py-3 px-1">
                                             {capitalize(account.type)}
                                         </td>
-                                        <td className="py-3 px-1 text-right font-mono">
+                                        <td
+                                            className={`py-3 px-1 text-right font-mono ${
+                                                parseFloat(account.balance) < 0
+                                                    ? "text-red-500 dark:text-red-700"
+                                                    : ""
+                                            }`}
+                                        >
                                             {formatBalance(
                                                 account.balance,
                                                 account.currency
                                             )}
                                         </td>
-                                        <td className="py-3 px-1">
-                                            <div className="flex justify-center">
+                                        <td className="py-3 px-1 md:flex md:justify-center">
+                                            <button
+                                                onClick={() =>
+                                                    handleStatusToggle(
+                                                        account.id,
+                                                        account.isActive
+                                                    )
+                                                }
+                                                className="flex justify-center"
+                                            >
                                                 <p
                                                     className={`w-15 text-sm rounded text-center ${
                                                         account.isActive
@@ -139,7 +158,7 @@ export const Accounts = ({ user }: AccountsProps) => {
                                                         ? "Active"
                                                         : "Inactive"}
                                                 </p>
-                                            </div>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
