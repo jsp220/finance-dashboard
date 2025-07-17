@@ -7,6 +7,9 @@ const TOKEN_KEY = "authToken";
 export const auth = {
     // Store user session after login
     login(token: string): void {
+        // Add server-side check:
+        if (typeof window === "undefined") return;
+
         localStorage.setItem(TOKEN_KEY, token);
     },
 
@@ -35,6 +38,9 @@ export const auth = {
 
     // Get JWT token
     getToken(): string | null {
+        // Add server-side check:
+        if (typeof window === "undefined") return null;
+
         return localStorage.getItem(TOKEN_KEY);
     },
 
@@ -58,6 +64,9 @@ export const auth = {
 
     // Logout and clear session
     logout(): void {
+        // Add server-side check:
+        if (typeof window === "undefined") return;
+
         localStorage.removeItem(TOKEN_KEY);
     },
 };

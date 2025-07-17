@@ -59,7 +59,7 @@ export default function Dashboard() {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="min-h-screen flex flex-col items-center w-xs md:w-2xl lg:w-4xl">
+            <div className="min-h-screen flex flex-col items-center w-[335px] md:w-2xl lg:w-4xl">
                 {/* Header */}
                 <header className="w-full flex justify-stretch items-center min-h-12 border-b-1">
                     <div className="md:w-3/4">

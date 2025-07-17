@@ -13,9 +13,9 @@ export async function authenticatedFetch(
     return fetch(url, {
         ...options,
         headers: {
-            ...options.headers,
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            ...options.headers,
         },
     });
 }
