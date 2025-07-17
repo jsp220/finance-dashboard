@@ -78,12 +78,6 @@ export const Transactions = ({
         }
     };
 
-    const loadMore = () => {
-        if (pagination.hasNext && !loadingTransactions) {
-            fetchTransactions(pagination.offset + pagination.limit);
-        }
-    };
-
     const resetFilters = () => {
         setSelectedAccount("");
         setSelectedCategory("");
