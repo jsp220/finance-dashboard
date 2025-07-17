@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { UserResponse } from "@/src/app/lib/types/user";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -55,6 +57,7 @@ export default function SignUp() {
             });
             localStorage.setItem("userId", createdUser?.id || "");
             alert("Account created successfully!");
+            router.push("/");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -211,6 +214,17 @@ export default function SignUp() {
                     </button>
                 </div>
             </form>
+
+            <p className="text-sm text-center">
+                Already have an account?{" "}
+                <button
+                    type="button"
+                    onClick={() => router.push("/")}
+                    className="dark:text-blue-400 text-blue-800 hover:text-blue-300 underline"
+                >
+                    Log in here
+                </button>
+            </p>
         </div>
     );
 }
