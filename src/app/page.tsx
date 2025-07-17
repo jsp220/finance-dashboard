@@ -2,13 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserResponse } from "@/src/app/lib/types/user";
 import { auth } from "@/lib/auth";
-
-interface LoginResponse {
-    message: string;
-    user: UserResponse;
-}
+import { LoginResponse } from "@/src/app/lib/types/auth";
 
 export default function Login() {
     const router = useRouter();
@@ -54,9 +49,9 @@ export default function Login() {
                 throw new Error(data.error || "Failed to log in");
             }
 
-            // Store user info in localStorage
+            // Store the token
             const loginData = data as LoginResponse;
-            auth.login(loginData.user);
+            auth.login(loginData.token);
 
             // Redirect to dashboard/home
             router.push("/dashboard");

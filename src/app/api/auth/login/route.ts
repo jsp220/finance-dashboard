@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
+// This route handles user login
+// It expects a POST request with email and password in the body
+// If successful, it returns user data (excluding password) and a JWT token
 export async function POST(request: NextRequest) {
     try {
         // Parse request body
@@ -25,8 +29,6 @@ export async function POST(request: NextRequest) {
                 name: true,
                 currency: true,
                 timezone: true,
-                createdAt: true,
-                updatedAt: true,
                 passwordHash: true, // ← We need this for login verification
             },
         });
@@ -52,14 +54,20 @@ export async function POST(request: NextRequest) {
         }
 
         // Remove passwordHash before sending response
-        const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
+        const { passwordHash: _, ...userWithoutPassword } = user;
 
-        // For now, return user data
-        // Later, this is where you'd generate a JWT token
-        return NextResponse.json({
-            message: "Login successful",
-            user: userWithoutPassword,
+        const token = jwt.sign(userWithoutPassword, process.env.JWT_SECRET!, {
+            expiresIn: "72h",
         });
+
+        return NextResponse.json(
+            {
+                message: "Login successful",
+                user: userWithoutPassword,
+                token,
+            },
+            { status: 200 }
+        );
     } catch (error) {
         console.error("Error during login:", error);
         return NextResponse.json(

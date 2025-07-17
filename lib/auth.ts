@@ -1,80 +1,63 @@
-import { BasicUser, UserSession } from "@/src/app/lib/types/user";
+import { JWTPayload } from "@/src/app/lib/types/auth";
+import { User } from "@/src/app/lib/types/user";
+import jwt from "jsonwebtoken";
 
-const SESSION_KEY = "userSession";
+const TOKEN_KEY = "authToken";
 
 export const auth = {
     // Store user session after login
-    login(user: { id: string; email: string; name: string }): void {
-        const session: UserSession = {
-            isLoggedIn: true,
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            loginTime: Date.now(),
-        };
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    login(token: string): void {
+        localStorage.setItem(TOKEN_KEY, token);
     },
 
     // Check if user is authenticated
     isAuthenticated(): boolean {
         try {
-            const session = localStorage.getItem(SESSION_KEY);
-            if (!session) return false;
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) return false;
 
-            const parsed: UserSession = JSON.parse(session);
-            return parsed.isLoggedIn === true && Boolean(parsed.id);
+            const decoded = jwt.decode(token) as JWTPayload | null;
+            if (!decoded || !decoded.id) return false;
+
+            // Check expiration
+            const now = Math.floor(Date.now() / 1000);
+            if (!decoded.exp || decoded.exp < now) {
+                this.logout();
+                return false;
+            }
+
+            return true;
         } catch {
+            this.logout();
             return false;
         }
     },
 
-    // Get current user session
-    getSession(): UserSession | null {
-        try {
-            const session = localStorage.getItem(SESSION_KEY);
-            return session ? JSON.parse(session) : null;
-        } catch {
-            return null;
-        }
+    // Get JWT token
+    getToken(): string | null {
+        return localStorage.getItem(TOKEN_KEY);
+    },
+
+    // Get user info for display. Uses the token, which means it may be stale once users are able to update their profile.
+    getUser(): User | null {
+        const token = this.getToken();
+        if (!token) return null;
+
+        const decoded = jwt.decode(token) as JWTPayload | null;
+        if (!decoded) return null;
+
+        const { iat: _iat, exp: _exp, ...user } = decoded;
+
+        return user;
     },
 
     // Get just the user ID (for API calls)
     getUserId(): string | null {
-        const session = this.getSession();
-        return session?.id || null;
-    },
-
-    // Get user info for display
-    getUser(): BasicUser | null {
-        const session = this.getSession();
-        if (!session) return null;
-
-        return {
-            id: session.id,
-            email: session.email,
-            name: session.name,
-        };
+        return this.getUser()?.id || null;
     },
 
     // Logout and clear session
     logout(): void {
-        localStorage.removeItem(SESSION_KEY);
-    },
-
-    // Check if session is expired
-    isSessionValid(): boolean {
-        const session = this.getSession();
-        if (!session) return false;
-
-        // Optional: Check if session is too old (e.g., 24 hours)
-        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-        const isExpired = Date.now() - session.loginTime > maxAge;
-
-        if (isExpired) {
-            this.logout();
-            return false;
-        }
-
-        return this.isAuthenticated();
+        localStorage.removeItem(TOKEN_KEY);
     },
 };

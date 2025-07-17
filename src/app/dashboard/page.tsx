@@ -62,7 +62,7 @@ export default function Dashboard() {
                         Welcome, {user.name}!
                     </h2>
 
-                    <Accounts user={user} />
+                    <Accounts />
                 </main>
             </div>
         </div>

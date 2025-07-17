@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { BasicUser } from "@/src/app/lib/types/user";
+import { authenticatedFetch } from "@/lib/api-client";
 
 interface CreateAccountModalProps {
-    user: BasicUser;
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
 }
 
 export const CreateAccountModal = ({
-    user,
     isOpen,
     onClose,
     onSuccess,
@@ -48,12 +46,8 @@ export const CreateAccountModal = ({
                 currency: formData.currency,
             };
 
-            const response = await fetch("/api/accounts", {
+            const response = await authenticatedFetch("/api/accounts", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-user-id": user.id,
-                },
                 body: JSON.stringify(accountData),
             });
 

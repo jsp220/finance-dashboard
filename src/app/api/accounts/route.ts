@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { AccountType } from "@/src/app/lib/enums/account-type";
+import { withAuth } from "@/lib/jwt-middleware";
 
-function getClientUserId(request: NextRequest): string | null {
-    // For now, get user ID from header (before JWT implementation)
-    return request.headers.get("x-user-id") || null;
-}
-
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (req: NextRequest, userId: string) => {
     try {
-        const userId = getClientUserId(request);
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: "User ID is required" },
-                { status: 400 }
-            );
-        }
-
         // Get all accounts for the user
         const accounts = await prisma.account.findMany({
             where: {
@@ -26,7 +13,6 @@ export async function GET(request: NextRequest) {
             select: {
                 id: true,
                 name: true,
-                userId: true,
                 type: true,
                 balance: true,
                 currency: true,
@@ -47,21 +33,12 @@ export async function GET(request: NextRequest) {
             { status: 500 }
         );
     }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (req: NextRequest, userId: string) => {
     try {
-        const userId = getClientUserId(request);
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: "User ID is required" },
-                { status: 400 }
-            );
-        }
-
         // Parse request body
-        const body = await request.json();
+        const body = await req.json();
         const { name, type, balance = 0, currency = "USD" } = body;
 
         // Basic validation
@@ -78,6 +55,14 @@ export async function POST(request: NextRequest) {
                 {
                     error: "Invalid account type. Must be: checking, savings, credit, or investment",
                 },
+                { status: 400 }
+            );
+        }
+
+        // Validate balance is a number
+        if (typeof balance !== "number") {
+            return NextResponse.json(
+                { error: "Balance must be a number" },
                 { status: 400 }
             );
         }
@@ -124,4 +109,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
+});

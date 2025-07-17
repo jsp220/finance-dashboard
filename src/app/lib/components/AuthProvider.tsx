@@ -21,7 +21,7 @@ export default function AuthProvider({
                 router.push("/");
             }
         }
-    }, [router]);
+    }, []);
 
     return <>{children}</>;
 }

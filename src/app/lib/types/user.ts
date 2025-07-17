@@ -9,10 +9,6 @@ export interface User extends BasicUser {
     timezone: string;
 }
 
-export interface UserSession extends BasicUser {
-    isLoggedIn: boolean;
-    loginTime: number;
-}
 export interface UserResponse extends User {
     createdAt: Date;
     updatedAt: Date;
