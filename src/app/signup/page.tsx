@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserResponse } from "@/src/app/lib/types/user";
 import { useRouter } from "next/navigation";
 
 export default function SignUp() {
@@ -15,7 +14,6 @@ export default function SignUp() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [createdUser, setCreatedUser] = useState<UserResponse | null>(null);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -47,7 +45,6 @@ export default function SignUp() {
                 throw new Error(data.error || "Failed to create account");
             }
 
-            setCreatedUser(data);
             setFormData({
                 email: "",
                 password: "",
@@ -55,7 +52,7 @@ export default function SignUp() {
                 currency: "USD",
                 timezone: "America/Los_Angeles",
             });
-            localStorage.setItem("userId", createdUser?.id || "");
+
             alert("Account created successfully!");
             router.push("/");
         } catch (err) {

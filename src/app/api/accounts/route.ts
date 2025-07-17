@@ -25,7 +25,7 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
             },
         });
 
-        return NextResponse.json({ accounts });
+        return NextResponse.json({ accounts }, { status: 200 });
     } catch (error) {
         console.error("Error fetching accounts:", error);
         return NextResponse.json(
@@ -101,7 +101,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
             },
         });
 
-        return NextResponse.json(account, { status: 201 });
+        return NextResponse.json({ account }, { status: 201 });
     } catch (error) {
         console.error("Error creating account:", error);
         return NextResponse.json(

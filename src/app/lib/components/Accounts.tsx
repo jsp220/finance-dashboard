@@ -66,9 +66,9 @@ export const Accounts = () => {
                 <h3 className="font-semibold md:mb-4">Your Accounts</h3>
 
                 {loadingAccounts ? (
-                    <div className="text-center py-8">Loading accounts...</div>
+                    <div className="text-center py-4">Loading accounts...</div>
                 ) : accountsError ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-4">
                         <p className="mb-2">Error: {accountsError}</p>
                         <button
                             onClick={() => fetchAccounts()}
@@ -78,27 +78,27 @@ export const Accounts = () => {
                         </button>
                     </div>
                 ) : accounts.length === 0 ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-4">
                         <p className="mb-2">No accounts found.</p>
                         <p className="text-sm">
                             Create your first account to get started!
                         </p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto py-4">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b-2">
-                                    <th className="text-left py-2 px-1 font-medium">
+                                    <th className="text-left pb-2 px-1 font-medium">
                                         Account Name
                                     </th>
-                                    <th className="text-left py-2 px-1 font-medium">
+                                    <th className="text-left pb-2 px-1 font-medium">
                                         Type
                                     </th>
-                                    <th className="text-right py-2 px-1 font-medium">
+                                    <th className="text-right pb-2 px-1 font-medium">
                                         Balance
                                     </th>
-                                    <th className="text-center py-2 px-1 font-medium">
+                                    <th className="text-center pb-2 px-1 font-medium">
                                         Status
                                     </th>
                                 </tr>
