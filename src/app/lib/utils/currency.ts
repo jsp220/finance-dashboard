@@ -1,4 +1,4 @@
-import { Currency } from "@/src/app/lib/enums/account-type";
+import { Currency } from "@/src/app/lib/enums/account";
 
 export const formatBalance = (balance: string, currency: Currency): string => {
     switch (currency) {

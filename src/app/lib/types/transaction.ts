@@ -1,4 +1,4 @@
-import { TransactionType } from "@/src/app/lib/enums/transaction-type";
+import { TransactionType } from "@/src/app/lib/enums/transaction";
 import { PaginationMeta } from "@/src/app/lib/types/pagination";
 
 export interface BasicTransaction {

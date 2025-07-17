@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { AccountType } from "@/src/app/lib/enums/account-type";
+import { AccountType } from "@/src/app/lib/enums/account";
 import { withAuth } from "@/lib/jwt-middleware";
 
 export const GET = withAuth(async (req: NextRequest, userId: string) => {

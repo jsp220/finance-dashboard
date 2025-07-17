@@ -1,4 +1,5 @@
 import { authenticatedFetch } from "@/lib/api-client";
+import { TransactionType } from "@/src/app/lib/enums/transaction";
 import { Account } from "@/src/app/lib/types/account";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ export const CreateTransactionModal = ({
     const [formData, setFormData] = useState({
         accountId: "",
         amount: "",
-        type: "expense",
+        type: TransactionType.Expense,
         category: "",
         description: "",
         date: new Date().toISOString().split("T")[0], // Today's date in YYYY-MM-DD
@@ -46,12 +47,16 @@ export const CreateTransactionModal = ({
         try {
             const transactionData = {
                 accountId: formData.accountId,
-                amount: parseFloat(formData.amount),
+                amount: Math.abs(parseFloat(formData.amount)),
                 type: formData.type,
                 category: formData.category,
                 description: formData.description || null,
                 date: formData.date,
             };
+
+            if (transactionData.amount === 0) {
+                throw new Error("Amount cannot be zero");
+            }
 
             const response = await authenticatedFetch("/api/transactions", {
                 method: "POST",
@@ -82,7 +87,7 @@ export const CreateTransactionModal = ({
         setFormData({
             accountId: "",
             amount: "",
-            type: "expense",
+            type: TransactionType.Expense,
             category: "",
             description: "",
             date: new Date().toISOString().split("T")[0],
@@ -237,7 +242,7 @@ export const CreateTransactionModal = ({
 
                     {error && (
                         <div className="mt-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
-                            <p className="text-sm">Error: {error}</p>
+                            <p className="text-sm">{error}</p>
                         </div>
                     )}
 

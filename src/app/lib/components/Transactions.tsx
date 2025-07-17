@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { Transaction } from "@/src/app/lib/types/transaction";
 import { Account } from "@/src/app/lib/types/account";
-import { capitalize } from "@/src/app/lib/utils";
+import { capitalize, formatBalance } from "@/src/app/lib/utils";
 import { CreateTransactionModal } from "@/src/app/lib/modals/CreateTransactionModal";
 import { authenticatedFetch } from "@/lib/api-client";
 import { PaginationMeta } from "@/src/app/lib/types/pagination";
+import { Currency } from "@/src/app/lib/enums/account";
 
 interface TransactionsProps {
     accounts: Account[];
@@ -89,9 +90,14 @@ export const Transactions = ({
         setSelectedType("");
     };
 
-    const getAccountName = (accountId: string) => {
+    const getAccountName = (accountId: string): string => {
         const account = accounts.find((acc) => acc.id === accountId);
         return account ? account.name : "Unknown Account";
+    };
+
+    const getAccountCurrency = (accountId: string): Currency => {
+        const account = accounts.find((acc) => acc.id === accountId);
+        return account ? account.currency : Currency.USD;
     };
 
     const handleAddTransaction = () => {
@@ -105,30 +111,6 @@ export const Transactions = ({
     const handleTransactionCreated = () => {
         fetchTransactions(pagination.offset);
         onAccountBalanceChange();
-    };
-
-    const formatTransactionAmount = (amount: string, type: string) => {
-        const numAmount = parseFloat(amount);
-        const isNegative = numAmount < 0;
-        const absAmount = Math.abs(numAmount);
-
-        return (
-            <span
-                className={`font-mono ${
-                    type === "expense" || isNegative
-                        ? "text-red-500 dark:text-red-400"
-                        : type === "income"
-                        ? "text-green-500 dark:text-green-400"
-                        : ""
-                }`}
-            >
-                {type === "expense" && !isNegative ? "-" : ""}$
-                {absAmount.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                })}
-            </span>
-        );
     };
 
     return (
@@ -236,7 +218,7 @@ export const Transactions = ({
                                         <td className="py-3 px-1">
                                             {transaction.description || "—"}
                                         </td>
-                                        <td className="py-3 px-1 text-sm">
+                                        <td className="py-3 px-1">
                                             {getAccountName(
                                                 transaction.accountId
                                             )}
@@ -244,10 +226,19 @@ export const Transactions = ({
                                         <td className="py-3 px-1">
                                             {capitalize(transaction.category)}
                                         </td>
-                                        <td className="py-3 px-1 text-right">
-                                            {formatTransactionAmount(
-                                                transaction.amount.toString(),
-                                                transaction.type
+                                        <td
+                                            className={`py-3 px-1 text-right font-mono ${
+                                                parseFloat(transaction.amount) <
+                                                0
+                                                    ? "text-red-700 dark:text-red-500"
+                                                    : "text-green-700 dark:text-green-500"
+                                            }`}
+                                        >
+                                            {formatBalance(
+                                                transaction.amount,
+                                                getAccountCurrency(
+                                                    transaction.accountId
+                                                )
                                             )}
                                         </td>
                                     </tr>
@@ -255,32 +246,67 @@ export const Transactions = ({
                             </tbody>
                         </table>
 
-                        {/* Load More Button */}
-                        {pagination.hasNext && (
-                            <div className="text-center mt-4">
+                        {/* Arrow Pagination */}
+                        {pagination.total > pagination.limit && (
+                            <div className="flex justify-center items-center mt-4 space-x-4">
                                 <button
-                                    onClick={loadMore}
-                                    disabled={loadingTransactions}
-                                    className="px-4 py-2 border border-gray-700 dark:border-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                                    onClick={() =>
+                                        fetchTransactions(
+                                            Math.max(
+                                                0,
+                                                pagination.offset -
+                                                    pagination.limit
+                                            )
+                                        )
+                                    }
+                                    disabled={
+                                        pagination.offset === 0 ||
+                                        loadingTransactions
+                                    }
+                                    className="px-3 py-2 border border-gray-700 dark:border-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {loadingTransactions
-                                        ? "Loading..."
-                                        : "Load More"}
+                                    ← Previous
+                                </button>
+
+                                <span className="text-sm opacity-60">
+                                    Page{" "}
+                                    {Math.floor(
+                                        pagination.offset / pagination.limit
+                                    ) + 1}{" "}
+                                    of{" "}
+                                    {Math.ceil(
+                                        pagination.total / pagination.limit
+                                    )}
+                                </span>
+
+                                <button
+                                    onClick={() =>
+                                        fetchTransactions(
+                                            pagination.offset + pagination.limit
+                                        )
+                                    }
+                                    disabled={
+                                        !pagination.hasNext ||
+                                        loadingTransactions
+                                    }
+                                    className="px-3 py-2 border border-gray-700 dark:border-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next →
                                 </button>
                             </div>
                         )}
 
                         {/* Pagination Info */}
                         <div className="text-center text-sm mt-2 opacity-60">
-                            Showing {pagination.offset + 1}-
-                            {pagination.offset + pagination.limit} of{" "}
-                            {pagination.total} transactions
+                            {`Showing ${pagination.offset + 1}-${
+                                pagination.offset + transactions.length
+                            } of ${pagination.total} transactions`}
                         </div>
                     </div>
                 )}
 
                 {/* Add Transaction Button */}
-                <div className="flex justify-center">
+                <div className="flex justify-center pb-4">
                     <button
                         onClick={handleAddTransaction}
                         className="px-4 py-2 border border-gray-700 dark:border-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors"

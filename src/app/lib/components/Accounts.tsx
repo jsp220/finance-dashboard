@@ -131,7 +131,7 @@ export const Accounts = ({
                                         <td
                                             className={`py-3 px-1 text-right font-mono ${
                                                 parseFloat(account.balance) < 0
-                                                    ? "text-red-500 dark:text-red-700"
+                                                    ? "text-red-700 dark:text-red-500"
                                                     : ""
                                             }`}
                                         >

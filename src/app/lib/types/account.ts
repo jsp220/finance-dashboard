@@ -1,4 +1,4 @@
-import { AccountType, Currency } from "@/src/app/lib/enums/account-type";
+import { AccountType, Currency } from "@/src/app/lib/enums/account";
 
 export interface BasicAccount {
     id: string;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/jwt-middleware";
-import { TransactionType } from "@/src/app/lib/enums/transaction-type";
+import { TransactionType } from "@/src/app/lib/enums/transaction";
 
 export const GET = withAuth(async (request: NextRequest, userId: string) => {
     try {
@@ -102,6 +102,13 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
             );
         }
 
+        if (amount == 0) {
+            return NextResponse.json(
+                { error: "Amount cannot be 0" },
+                { status: 400 }
+            );
+        }
+
         // Validate transaction type
         if (!Object.values(TransactionType).includes(type)) {
             return NextResponse.json(
@@ -110,6 +117,11 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
                 },
                 { status: 400 }
             );
+        }
+
+        let newAmount = amount;
+        if (type == TransactionType.Expense) {
+            newAmount = -amount;
         }
 
         // Validate date format (YYYY-MM-DD)
@@ -135,13 +147,14 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
                 throw new Error("Account not found or access denied");
             }
 
-            const newBalance = parseFloat(account.balance.toString()) + amount;
+            const newBalance =
+                parseFloat(account.balance.toString()) + newAmount;
 
             const transaction = await tx.transaction.create({
                 data: {
                     userId,
                     accountId,
-                    amount,
+                    amount: newAmount,
                     type,
                     category,
                     description: description || null,
