@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Remove passwordHash before sending response
-        const { passwordHash, ...userWithoutPassword } = user;
+        const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
         // For now, return user data
         // Later, this is where you'd generate a JWT token
