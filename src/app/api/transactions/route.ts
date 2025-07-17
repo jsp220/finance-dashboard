@@ -121,46 +121,56 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
             );
         }
 
-        // Check if account exists and belongs to user
-        const account = await prisma.account.findFirst({
-            where: {
-                id: accountId,
-                userId: userId,
-            },
+        // Use database transaction to ensure atomicity
+        const result = await prisma.$transaction(async (tx) => {
+            // Check if account exists and belongs to user
+            const account = await tx.account.findFirst({
+                where: {
+                    id: accountId,
+                    userId: userId,
+                },
+            });
+
+            if (!account) {
+                throw new Error("Account not found or access denied");
+            }
+
+            const newBalance = parseFloat(account.balance.toString()) + amount;
+
+            const transaction = await tx.transaction.create({
+                data: {
+                    userId,
+                    accountId,
+                    amount,
+                    type,
+                    category,
+                    description: description || null,
+                    date,
+                },
+                select: {
+                    id: true,
+                    accountId: true,
+                    amount: true,
+                    type: true,
+                    category: true,
+                    description: true,
+                    date: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+
+            const updatedAccount = await tx.account.update({
+                where: { id: accountId },
+                data: {
+                    balance: newBalance,
+                },
+            });
+
+            return { transaction, updatedAccount };
         });
 
-        if (!account) {
-            return NextResponse.json(
-                { error: "Account not found or access denied" },
-                { status: 404 }
-            );
-        }
-
-        // Create the transaction
-        const transaction = await prisma.transaction.create({
-            data: {
-                userId,
-                accountId,
-                amount,
-                type,
-                category,
-                description: description || null,
-                date,
-            },
-            select: {
-                id: true,
-                accountId: true,
-                amount: true,
-                type: true,
-                category: true,
-                description: true,
-                date: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        return NextResponse.json(transaction, { status: 201 });
+        return NextResponse.json(result.transaction, { status: 201 });
     } catch (error) {
         console.error("Error creating transaction:", error);
         return NextResponse.json(
